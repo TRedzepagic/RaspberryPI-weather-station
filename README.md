@@ -25,7 +25,7 @@ CREATE TABLE READINGS
     PRIMARY KEY (ID)
 );
 ```
-Now i'ts time to setup your user. You can do that by running this command in the mysql shell:
+Now it's time to setup your user. You can do that by running this command in the mysql shell:
 
 ```
 CREATE USER 'testuser'@'localhost' IDENTIFIED BY 'testpassword';
