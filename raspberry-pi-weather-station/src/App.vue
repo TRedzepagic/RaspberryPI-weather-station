@@ -1,7 +1,7 @@
 <template>
 <div>
   <img alt="Vue logo" src="./assets/logo.png">
-  <Main msg="Welcome to our Distributed Systems of Autmation project website!"/>
+  <Main msg="Welcome to our Distributed Systems of Automation project website!"/>
 </div>
 </template>
 
