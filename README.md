@@ -55,6 +55,8 @@ sudo -E flask run --host=0.0.0.0 --port=8090
 
 ### Project setup
 ```
+sudo apt install nodejs (if you don't have it)
+npm install @vue/cli
 npm install
 npm install --save axios
 ```
