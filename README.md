@@ -1,4 +1,4 @@
-# Raspberry pi zero weather station based on BMP280 sensor
+# Raspberry Pi Zero W Weather Station Based on BMP280 Sensor
 
 Website contains a MySQL Database <--> Go backend <--> Vue frontend. 
 
