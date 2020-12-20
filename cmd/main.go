@@ -25,15 +25,42 @@ type dbHandler struct {
 	db *sql.DB
 }
 
+type dbconfig struct {
+	DbDriver string `json:"dbdriver"`
+	DbUser   string `json:"dbuser"`
+	DbPass   string `json:"dbpass"`
+	DbName   string `json:"dbname"`
+}
+
 func dbConn() *dbHandler {
-	dbDriver := "mysql"
-	dbUser := "testuser"
-	dbPass := "testpassword"
-	dbName := "SENSORDATA"
+	data, err := ioutil.ReadFile("./dbconf.json")
+
+	if err != nil {
+		fmt.Println("error opening configuration", err.Error())
+	}
+
+	var databaseConfig dbconfig
+	err = json.Unmarshal(data, &databaseConfig)
+	if err != nil {
+		fmt.Println("unmarshalling error: ", err.Error())
+	}
+
+	dbDriver := databaseConfig.DbDriver
+	dbUser := databaseConfig.DbUser
+	dbPass := databaseConfig.DbPass
+	dbName := databaseConfig.DbName
+
+	// Check
+	fmt.Println(databaseConfig.DbDriver)
+	fmt.Println(databaseConfig.DbUser)
+	fmt.Println(databaseConfig.DbPass)
+	fmt.Println(databaseConfig.DbName)
+
 	db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@/"+dbName)
 	if err != nil {
 		fmt.Println(err)
 	}
+
 	var DataBase dbHandler
 	DataBase.db = db
 	return &DataBase
@@ -60,7 +87,7 @@ func (dbHandler *dbHandler) getReadings(w http.ResponseWriter, req *http.Request
 		err := rows.Scan(&sensVal.ID, &sensVal.Temperature, &sensVal.Pressure, &sensVal.Altitude, &sensVal.Time)
 		if err != nil {
 			log.Print(err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusInternalServerError)
 			return
 		}
 		readingSlice = append(readingSlice, sensVal)
@@ -74,6 +101,14 @@ func (dbHandler *dbHandler) postReading(w http.ResponseWriter, req *http.Request
 	defer req.Body.Close()
 	var sensVal SensorValues
 	err = json.Unmarshal(body, &sensVal)
+
+	if sensVal.Temperature == "" || sensVal.Altitude == "" || sensVal.Pressure == "" {
+		http.Error(w, http.StatusText(http.StatusNoContent), http.StatusBadRequest)
+		fmt.Println("Bad request, empty fields")
+		return
+	}
+
+	fmt.Print(sensVal)
 	if err != nil {
 		log.Print(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -94,19 +129,37 @@ func (dbHandler *dbHandler) postReading(w http.ResponseWriter, req *http.Request
 		log.Print(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
+
 	}
 }
 func (dbHandler *dbHandler) deleteReading(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	if params["id"] == "" {
-		log.Println("No ID")
+		fmt.Println("No ID")
 		http.Error(w, "No ID", http.StatusNoContent)
 		return
 	}
-	_, err := dbHandler.db.Query("DELETE FROM READINGS WHERE id=?", params["id"])
+
+	stmt, err := dbHandler.db.Prepare(("DELETE FROM READINGS WHERE id=?"))
+	defer stmt.Close()
 	if err != nil {
 		log.Print(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	}
+	result, err := stmt.Exec(params["id"])
+	if err != nil {
+		log.Print(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Print(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	if rowsAffected == 0 {
+		http.Error(w, http.StatusText(http.StatusNoContent), http.StatusNoContent)
 		return
 	}
 }
@@ -118,20 +171,36 @@ func (dbHandler *dbHandler) updateReading(w http.ResponseWriter, req *http.Reque
 		http.Error(w, "No ID", http.StatusNoContent)
 		return
 	}
+	fmt.Println("ID PARAM: " + params["id"])
 	body, err := ioutil.ReadAll(req.Body)
 	defer req.Body.Close()
 	var sensVal SensorValues
 	err = json.Unmarshal(body, &sensVal)
+	if sensVal.Temperature == "" || sensVal.Altitude == "" || sensVal.Pressure == "" {
+		http.Error(w, http.StatusText(http.StatusNoContent), http.StatusBadRequest)
+		fmt.Println("Bad request, empty fields")
+		return
+	}
 	if err != nil {
 		log.Print(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	sensVal.Time = getTime()
-	_, err = dbHandler.db.Exec("UPDATE READINGS SET Temperature = ?, Pressure = ?, Altitude = ?, Time = ? where id = ?", sensVal.Temperature, sensVal.Pressure, sensVal.Altitude, sensVal.Time, params["id"])
+	result, err := dbHandler.db.Exec("UPDATE READINGS SET Temperature = ?, Pressure = ?, Altitude = ?, Time = ? where id = ?", sensVal.Temperature, sensVal.Pressure, sensVal.Altitude, sensVal.Time, params["id"])
 	if err != nil {
 		log.Print(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Print(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	if rowsAffected == 0 {
+		http.Error(w, http.StatusText(http.StatusNoContent), http.StatusNoContent)
 		return
 	}
 

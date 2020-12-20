@@ -1,0 +1,6 @@
+{
+    "dbdriver" : "mysql",
+    "dbuser" : "testuser",
+    "dbpass" : "testpassword",
+    "dbname" : "SENSORDATA"
+}
