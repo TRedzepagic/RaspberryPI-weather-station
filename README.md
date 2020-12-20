@@ -3,7 +3,7 @@
 Website contains a MySQL Database <--> Go backend <--> Vue frontend. 
 
 Data is sent from a Raspberry Pi Zero W that has a BMP280 sensor attached to it. Main server that handles the requests is written in Golang, RPI also runs a server on it own and it used to light up a LED on the RPI to demonstrate duplex functionality and it's written in Python.
-![Screenshot from 2020-12-13 21-19-59](./website-sshot.png)
+![Screenshot from 2020-12-13 21-19-59](./website.png)
 ## Cloning
 ```
 git clone https://github.com/TRedzepagic/RaspberryPI-weather-station.git
