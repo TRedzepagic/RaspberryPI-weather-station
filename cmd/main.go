@@ -75,7 +75,7 @@ func (dbHandler *dbHandler) getReadings(w http.ResponseWriter, req *http.Request
 	var sensVal SensorValues
 	var readingSlice []SensorValues
 
-	rows, err := dbHandler.db.Query("SELECT id, Temperature,Pressure,Altitude,Time FROM READINGS ORDER BY Time DESC LIMIT 10")
+	rows, err := dbHandler.db.Query("SELECT id, Temperature,Pressure,Altitude,Time FROM READINGS ORDER BY id DESC LIMIT 10")
 	defer rows.Close()
 	if err != nil {
 		log.Print(err)

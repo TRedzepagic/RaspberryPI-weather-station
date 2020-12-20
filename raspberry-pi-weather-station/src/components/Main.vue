@@ -49,7 +49,10 @@
           <button type="button" v-on:click="getAll" class="btn btn-dark">
           Get All Readings (GET)
         </button>
-          <button type="button" v-on:click="toggleLED" class="btn btn-dark">
+          <button type="button" v-on:click="toggleLED" v-if="!ledState.ledOn"  class="btn btn-danger">
+          Toggle LED (RPi)
+        </button>
+          <button type="button" v-on:click="toggleLED" v-if="ledState.ledOn"  class="btn btn-success">
           Toggle LED (RPi)
         </button>
         </form>
@@ -97,11 +100,19 @@
 
 <script>
 import axios from 'axios';
- var Timeout;
+// Set to private IP of Main Server
+var mainServerPath="http://192.168.0.23:8090";
+// Set to private IP of Raspberry Pi
+var rpiAddress="https://192.168.0.x:xxxx"
+var Timeout;
 export default {
   name: 'main',
   props: { msg: String },
   data(){return {
+    ledState:
+    {
+      ledOn: false,
+    },
     formDelete:{
       idDelete: '',
     },
@@ -116,7 +127,7 @@ export default {
     }},
   methods:{
     getAll() {
-      axios.get(`http://192.168.0.23:8090/getReadings`)
+      axios.get(mainServerPath+"/getReadings")
       .then(response => {
       // JSON responses are automatically parsed.
       this.readingsList = response.data;
@@ -143,7 +154,7 @@ export default {
       
     }else{
      axios.post(
-    "http://192.168.0.23:8090/postReading",
+    mainServerPath+"/postReading",
     {
     temperature: this.form.temperature,
     pressure: this.form.pressure,
@@ -182,7 +193,7 @@ export default {
       
     }else{
     axios.put(
-    "http://192.168.0.23:8090/updateReading/"+this.form.id,
+    mainServerPath+"/updateReading/"+this.form.id,
     {
     id: this.form.id,
     temperature: this.form.temperature,
@@ -225,7 +236,7 @@ export default {
       
     }else{
   axios.delete(
-    "http://192.168.0.23:8090/deleteReading/"+this.formDelete.idDelete).then(response => {
+    mainServerPath+"/deleteReading/"+this.formDelete.idDelete).then(response => {
       // JSON responses are automatically parsed.
       console.log(response);
       if(response.status==204)
@@ -249,11 +260,15 @@ export default {
     
   },
   toggleLED(){
-    axios.get(
-    "http://RPI-IP:RPI-PORT/toggleLed/").then(response => {
+    axios.get(rpiAddress+"toggleLed/").then(response => {
       // JSON responses are automatically parsed.
       console.log(response);
       alert("LED Toggled! LED state: "+response.data.state);
+      if(response.data.state=="1"){
+        this.ledState=true;
+      }else if(response.data.state=="0"){
+        this.ledState=false;
+      }
     })
     .catch(e => {
       console.log(e);
