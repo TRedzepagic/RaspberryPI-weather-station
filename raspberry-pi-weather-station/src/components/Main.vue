@@ -40,22 +40,22 @@
           />
 
         </div>
-                <button type="button" v-on:click="postReading" class="btn btn-dark" :disabled=isDisabledPost>
+          <button type="button" v-on:click="postReading" class="btn btn-dark" :disabled=isDisabledPost>
           Add New Reading (POST)
         </button>
-              <button type="button" v-on:click="updateReading" class="btn btn-dark" :disabled=isDisabledPut>
+          <button type="button" v-on:click="updateReading" class="btn btn-dark" :disabled=isDisabledPut>
           Update Existing Reading (PUT)
         </button>
           <button type="button" v-on:click="getAll" class="btn btn-dark">
           Get All Readings (GET)
         </button>
-              <button type="button" v-on:click="toggleLED" class="btn btn-dark">
+          <button type="button" v-on:click="toggleLED" class="btn btn-dark">
           Toggle LED (RPi)
         </button>
         </form>
 
 
-        <form v-on:submit.prevent>
+        <form>
         <div class="form-group">
           <label for="id">ID</label>
           <input
@@ -66,8 +66,9 @@
             required
           />
         </div>
-        <input type="submit" value="Delete Reading (DELETE)" v-on:click="deleteReading" class="btn btn-danger" :disabled=isDisabledDelete>
-
+          <button type="button" v-on:click="deleteReading" class="btn btn-danger" :disabled=isDisabledDelete>
+          Delete Reading (DELETE)
+        </button>
       </form>
 
       
