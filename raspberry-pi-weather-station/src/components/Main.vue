@@ -263,7 +263,6 @@ export default {
     axios.get(rpiAddress+"/toggleLed").then(response => {
       // JSON responses are automatically parsed.
       console.log(response);
-      alert("LED Toggled! LED state: "+response.data.state);
       if(response.data.state=="1"){
         this.ledState.ledOn=true;
         alert("LED toggled! LED is now on!");
