@@ -265,9 +265,11 @@ export default {
       console.log(response);
       alert("LED Toggled! LED state: "+response.data.state);
       if(response.data.state=="1"){
-        this.ledState=true;
+        this.ledState.ledOn=true;
+        alert("LED toggled! LED is now on!");
       }else if(response.data.state=="0"){
-        this.ledState=false;
+        this.ledState.ledOn=false;
+        alert("LED toggled! LED is now off!");
       }
     })
     .catch(e => {
